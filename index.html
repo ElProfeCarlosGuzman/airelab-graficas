@@ -68,7 +68,11 @@ async function cargarDatos(){
 }
 
 function crearGraficas(temp, hum, mq, co2){
-
+Highcharts.setOptions({
+    time: {
+        timezoneOffset: 5 * 60
+    }
+});
   // --- TEMPERATURA ---
   let ultimoTemp = temp[temp.length-1][1];
   let estadoTemp = ultimoTemp < 20 ? 'Baja' : (ultimoTemp <= 30 ? 'Normal' : 'Alta');
@@ -140,4 +144,5 @@ setInterval(cargarDatos,6000);
 </script>
 
 </body>
+
 </html>
