@@ -107,11 +107,12 @@ Highcharts.setOptions({
     xAxis:{type:'datetime'},
     yAxis:{
       title:{text:'%'},
+      min:0,
       max:120,
       plotBands:[
         {from:0, to:50, color:'rgba(255,0,0,0.2)', label:{text:'Mala', style:{color:'#900'}}},
         {from:50, to:75, color:'rgba(255,165,0,0.2)', label:{text:'Moderada', style:{color:'#a60'}}},
-        {from:75, to:120, color:'rgba(0,255,0,0.2)', label:{text:'Buena', style:{color:'#090'}}}
+        {from:75, to:125, color:'rgba(0,255,0,0.2)', label:{text:'Buena', style:{color:'#090'}}}
       ]
     },
     series:[{name:'Calidad Aire', data:mq, color:'#009900'}]
@@ -146,4 +147,5 @@ setInterval(cargarDatos,6000);
 </body>
 
 </html>
+
 
