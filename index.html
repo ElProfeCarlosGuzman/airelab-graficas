@@ -16,7 +16,7 @@ h1{
   margin-top:20px;
 }
 #alerta{
-  font-size:36px;
+  font-size:24px; /* título más pequeño */
   font-weight:bold;
   margin:20px;
 }
@@ -28,7 +28,7 @@ h1{
   margin:auto;
 }
 .chart{
-  height:400px;
+  height:300px; /* para que entren sin scroll */
   background:#ffffff;
   border-radius:10px;
   padding:10px;
@@ -84,40 +84,56 @@ async function cargarDatos(){
   Highcharts.setOptions({time: {timezoneOffset: 5*60}});
 
   // --- TEMPERATURA ---
+  let estadoTemp = ultimoTemp < 20 ? "Baja" : (ultimoTemp > 30 ? "Alta" : "Normal");
   Highcharts.chart('tempChart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'Temperatura del Aula'},
+    subtitle:{text:'Estado: '+estadoTemp, align:'right', verticalAlign:'middle',
+              style:{fontWeight:'bold', color:'#ff4d4d'}},
     xAxis:{type:'datetime'},
     yAxis:{title:{text:'°C'}, min:0, max:50},
     series:[{name:'Temperatura', data:temp, color:'#ff4d4d'}]
   });
 
   // --- HUMEDAD ---
+  let ultimoHum = hum[hum.length-1][1];
+  let estadoHum = ultimoHum < 30 ? 'Baja' : (ultimoHum <= 60 ? 'Normal' : 'Alta');
   Highcharts.chart('humChart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'Humedad Relativa'},
+    subtitle:{text:'Estado: '+estadoHum, align:'right', verticalAlign:'middle',
+              style:{fontWeight:'bold', color:'#4da6ff'}},
     xAxis:{type:'datetime'},
     yAxis:{title:{text:'%'}, min:0, max:100},
     series:[{name:'Humedad', data:hum, color:'#4da6ff'}]
   });
 
   // --- CALIDAD DEL AIRE ---
+  let ultimoMQ = mq[mq.length-1][1];
+  let estadoMQ = ultimoMQ < 50 ? 'Mala' : (ultimoMQ <= 75 ? 'Moderada' : 'Buena');
   Highcharts.chart('mqChart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'Calidad del Aire (%)'},
+    subtitle:{text:'Estado: '+estadoMQ, align:'right', verticalAlign:'middle',
+              style:{fontWeight:'bold', color:'#009900'}},
     xAxis:{type:'datetime'},
     yAxis:{title:{text:'%'}, min:0, max:120},
     series:[{name:'Calidad Aire', data:mq, color:'#009900'}]
   });
 
   // --- CO2 ---
+  let ultimoCO2 = co2[co2.length-1][1];
+  let estadoCO2 = ultimoCO2 < 800 ? 'Bueno' : (ultimoCO2 <= 1200 ? 'Moderado' : 'Alto');
   Highcharts.chart('co2Chart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'CO₂ estimado (ppm)'},
+    subtitle:{text:'Estado: '+estadoCO2, align:'right', verticalAlign:'middle',
+              style:{fontWeight:'bold', color:'#ff4d4d'}},
     xAxis:{type:'datetime'},
     yAxis:{title:{text:'ppm'}, min:400, max:2000},
     series:[{name:'CO₂', data:co2, color:'#ff4d4d'}]
   });
+
 }
 
 cargarDatos();
