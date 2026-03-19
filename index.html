@@ -11,27 +11,30 @@ body{
   background:#ffffff;
   color:#000;
   text-align:center;
+  margin:0;
+  padding:0;
 }
 h1{
   margin-top:20px;
 }
 #alerta{
-  font-size:24px; /* título más pequeño */
+  font-size:24px; /* tamaño más pequeño */
   font-weight:bold;
-  margin:20px;
+  margin:10px 0;
 }
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:30px;
-  width:90%;
+  grid-auto-rows:1fr;
+  gap:15px;
+  width:95%;
   margin:auto;
 }
 .chart{
-  height:300px; /* para que entren sin scroll */
+  height:250px; /* ajustado para entrar en pantalla */
   background:#ffffff;
   border-radius:10px;
-  padding:10px;
+  padding:5px;
 }
 </style>
 </head>
@@ -81,56 +84,88 @@ async function cargarDatos(){
     alerta.style.color = "green";
   }
 
-  Highcharts.setOptions({time: {timezoneOffset: 5*60}});
+  Highcharts.setOptions({time:{timezoneOffset:5*60}});
 
   // --- TEMPERATURA ---
-  let estadoTemp = ultimoTemp < 20 ? "Baja" : (ultimoTemp > 30 ? "Alta" : "Normal");
   Highcharts.chart('tempChart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'Temperatura del Aula'},
-    subtitle:{text:'Estado: '+estadoTemp, align:'right', verticalAlign:'middle',
+    subtitle:{text:'Último valor: '+ultimoTemp+' °C', align:'right', verticalAlign:'middle',
               style:{fontWeight:'bold', color:'#ff4d4d'}},
     xAxis:{type:'datetime'},
-    yAxis:{title:{text:'°C'}, min:0, max:50},
+    yAxis:{
+      title:{text:'°C'},
+      min:0,
+      max:50,
+      plotBands:[
+        {from:0, to:20, color:'rgba(0,0,255,0.1)', label:{text:'Baja', style:{color:'#00f'}}},
+        {from:20, to:30, color:'rgba(0,255,0,0.1)', label:{text:'Normal', style:{color:'#090'}}},
+        {from:30, to:50, color:'rgba(255,0,0,0.1)', label:{text:'Alta', style:{color:'#900'}}}
+      ]
+    },
     series:[{name:'Temperatura', data:temp, color:'#ff4d4d'}]
   });
 
   // --- HUMEDAD ---
-  let ultimoHum = hum[hum.length-1][1];
-  let estadoHum = ultimoHum < 30 ? 'Baja' : (ultimoHum <= 60 ? 'Normal' : 'Alta');
+  const ultimoHum = hum[hum.length-1][1];
   Highcharts.chart('humChart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'Humedad Relativa'},
-    subtitle:{text:'Estado: '+estadoHum, align:'right', verticalAlign:'middle',
+    subtitle:{text:'Último valor: '+ultimoHum+' %', align:'right', verticalAlign:'middle',
               style:{fontWeight:'bold', color:'#4da6ff'}},
     xAxis:{type:'datetime'},
-    yAxis:{title:{text:'%'}, min:0, max:100},
+    yAxis:{
+      title:{text:'%'},
+      min:0,
+      max:100,
+      plotBands:[
+        {from:0, to:30, color:'rgba(0,0,255,0.1)', label:{text:'Baja', style:{color:'#00f'}}},
+        {from:30, to:60, color:'rgba(0,255,0,0.1)', label:{text:'Normal', style:{color:'#090'}}},
+        {from:60, to:100, color:'rgba(255,0,0,0.1)', label:{text:'Alta', style:{color:'#900'}}}
+      ]
+    },
     series:[{name:'Humedad', data:hum, color:'#4da6ff'}]
   });
 
   // --- CALIDAD DEL AIRE ---
-  let ultimoMQ = mq[mq.length-1][1];
-  let estadoMQ = ultimoMQ < 50 ? 'Mala' : (ultimoMQ <= 75 ? 'Moderada' : 'Buena');
+  const ultimoMQ = mq[mq.length-1][1];
   Highcharts.chart('mqChart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'Calidad del Aire (%)'},
-    subtitle:{text:'Estado: '+estadoMQ, align:'right', verticalAlign:'middle',
+    subtitle:{text:'Último valor: '+ultimoMQ+' %', align:'right', verticalAlign:'middle',
               style:{fontWeight:'bold', color:'#009900'}},
     xAxis:{type:'datetime'},
-    yAxis:{title:{text:'%'}, min:0, max:120},
+    yAxis:{
+      title:{text:'%'},
+      min:0,
+      max:120,
+      plotBands:[
+        {from:0, to:50, color:'rgba(255,0,0,0.1)', label:{text:'Mala', style:{color:'#900'}}},
+        {from:50, to:75, color:'rgba(255,165,0,0.1)', label:{text:'Moderada', style:{color:'#a60'}}},
+        {from:75, to:120, color:'rgba(0,255,0,0.1)', label:{text:'Buena', style:{color:'#090'}}}
+      ]
+    },
     series:[{name:'Calidad Aire', data:mq, color:'#009900'}]
   });
 
   // --- CO2 ---
-  let ultimoCO2 = co2[co2.length-1][1];
-  let estadoCO2 = ultimoCO2 < 800 ? 'Bueno' : (ultimoCO2 <= 1200 ? 'Moderado' : 'Alto');
+  const ultimoCO2 = co2[co2.length-1][1];
   Highcharts.chart('co2Chart', {
     chart:{type:'spline', backgroundColor:'#ffffff'},
     title:{text:'CO₂ estimado (ppm)'},
-    subtitle:{text:'Estado: '+estadoCO2, align:'right', verticalAlign:'middle',
+    subtitle:{text:'Último valor: '+ultimoCO2+' ppm', align:'right', verticalAlign:'middle',
               style:{fontWeight:'bold', color:'#ff4d4d'}},
     xAxis:{type:'datetime'},
-    yAxis:{title:{text:'ppm'}, min:400, max:2000},
+    yAxis:{
+      title:{text:'ppm'},
+      min:400,
+      max:2000,
+      plotBands:[
+        {from:0, to:800, color:'rgba(0,255,0,0.1)', label:{text:'Bueno', style:{color:'#090'}}},
+        {from:800, to:1200, color:'rgba(255,165,0,0.1)', label:{text:'Moderado', style:{color:'#a60'}}},
+        {from:1200, to:2000, color:'rgba(255,0,0,0.1)', label:{text:'Alto', style:{color:'#900'}}}
+      ]
+    },
     series:[{name:'CO₂', data:co2, color:'#ff4d4d'}]
   });
 
