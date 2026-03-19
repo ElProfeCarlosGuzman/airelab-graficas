@@ -2,12 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>AIRELAB IA PRO</title>
-<script src="https://script.google.com/macros/s/AKfycbxb6Tn1TKUvhSNN_j2FNctd8_7RGiPEtK3_SOn2YsPgWEgC2tgz2gfDrgGTsTdJQeVT/exec"></script>
+<title>AIRELAB Estación Ambiental Escolar</title>
+<script src="https://code.highcharts.com/highcharts.js"></script>
 
 <style>
 body{
   font-family:Arial;
+  background:#ffffff;
+  color:#000;
   text-align:center;
 }
 
@@ -16,79 +18,141 @@ h1{
 }
 
 #alerta{
-  font-size:24px;
+  font-size:36px;
   font-weight:bold;
   margin:20px;
 }
 
-#co2{
-  height:400px;
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:30px;
   width:90%;
   margin:auto;
 }
+
+.chart{
+  height:400px;
+  background:#ffffff;
+  border-radius:10px;
+  padding:10px;
+}
 </style>
 </head>
-
 <body>
 
-<h1>🌎 AIRELAB IA PRO 🌎</h1>
+<h1>🌎 AIRELAB Estación Ambiental Escolar 🌎</h1>
 
-<div id="alerta"></div>
+<!-- ALERTA DE TEMPERATURA -->
+<div id="alerta">Cargando temperatura...</div>
 
-<div id="co2"></div>
+<div class="grid">
+  <div id="tempChart" class="chart"></div>
+  <div id="humChart" class="chart"></div>
+  <div id="mqChart" class="chart"></div>
+  <div id="co2Chart" class="chart"></div>
+</div>
 
 <script>
-
 const url = "https://script.google.com/macros/s/AKfycbxb6Tn1TKUvhSNN_j2FNctd8_7RGiPEtK3_SOn2YsPgWEgC2tgz2gfDrgGTsTdJQeVT/exec";
 
-async function cargar(){
+async function cargarDatos(){
+  const response = await fetch(url);
+  const data = await response.json();
 
-  const r = await fetch(url);
-  const data = await r.json();
-
-  let co2=[], pred=[], estados=[];
+  let temp=[], hum=[], mq=[], co2=[];
 
   data.forEach(d=>{
     let t = new Date(d.fecha).getTime();
-
+    temp.push([t, Number(d.temperatura)]);
+    hum.push([t, Number(d.humedad)]);
+    mq.push([t, Number(d.calidad_aire)]);
     co2.push([t, Number(d.co2)]);
-    pred.push([t, Number(d.co2_predicho)]);
-    estados.push(d.estado);
   });
 
-  let estado = estados[estados.length-1];
-
+  // --- ALERTA DE TEMPERATURA ---
+  let ultimoTemp = temp[temp.length-1][1];
   let alerta = document.getElementById("alerta");
 
-  if(estado=="PELIGRO"){
-    alerta.innerHTML="🚨 AIRE PELIGROSO - VENTILAR YA";
-    alerta.style.color="red";
-  }
-  else if(estado=="PRECAUCION"){
-    alerta.innerHTML="⚠️ PRECAUCIÓN - AIRE EMPEORANDO";
-    alerta.style.color="orange";
-  }
-  else{
-    alerta.innerHTML="🟢 AIRE ÓPTIMO";
-    alerta.style.color="green";
+  if(ultimoTemp < 20){
+    alerta.innerHTML = "❄️ Temperatura BAJA ❄️";
+    alerta.style.color = "blue";
+  } else if(ultimoTemp > 30){
+    alerta.innerHTML = "🔥 Temperatura ALTA 🔥";
+    alerta.style.color = "red";
+  } else{
+    alerta.innerHTML = "🟢 Temperatura NORMAL 🟢";
+    alerta.style.color = "green";
   }
 
-  Highcharts.chart('co2', {
-    chart:{type:'spline'},
-    title:{text:'CO₂ Inteligente'},
+  // --- GRAFICAS ---
+  Highcharts.setOptions({
+      time: { timezoneOffset: 5*60 }
+  });
+
+  // Temperatura
+  Highcharts.chart('tempChart', {
+    chart:{type:'spline', backgroundColor:'#ffffff'},
+    title:{text:'Temperatura del Aula'},
+    subtitle:{text:'Estado: '+((ultimoTemp<20)?"Baja":(ultimoTemp>30?"Alta":"Normal")),
+              align:'right', verticalAlign:'middle',
+              style:{fontWeight:'bold', color:'#ff4d4d'}},
     xAxis:{type:'datetime'},
-    yAxis:{title:{text:'ppm'}},
-    series:[
-      {name:'CO₂ real', data:co2, color:'#ff4d4d'},
-      {name:'Predicción', data:pred, dashStyle:'Dash', color:'#000'}
-    ]
+    yAxis:{title:{text:'°C'}, min:0, max:50},
+    series:[{name:'Temperatura', data:temp, color:'#ff4d4d'}]
+  });
+
+  // Humedad
+  let ultimoHum = hum[hum.length-1][1];
+  let estadoHum = ultimoHum < 30 ? 'Baja' : (ultimoHum <= 60 ? 'Normal' : 'Alta');
+  Highcharts.chart('humChart', {
+    chart:{type:'spline', backgroundColor:'#ffffff'},
+    title:{text:'Humedad Relativa'},
+    subtitle:{text:'Estado: '+estadoHum, align:'right', verticalAlign:'middle', style:{fontWeight:'bold', color:'#4da6ff'}},
+    xAxis:{type:'datetime'},
+    yAxis:{title:{text:'%'}, min:0, max:100},
+    series:[{name:'Humedad', data:hum, color:'#4da6ff'}]
+  });
+
+  // Calidad Aire
+  let ultimoMQ = mq[mq.length-1][1];
+  let estadoMQ = ultimoMQ < 50 ? 'Mala' : (ultimoMQ <= 75 ? 'Moderada' : 'Buena');
+  Highcharts.chart('mqChart', {
+    chart:{type:'spline', backgroundColor:'#ffffff'},
+    title:{text:'Calidad del Aire (%)'},
+    subtitle:{text:'Estado: '+estadoMQ, align:'right', verticalAlign:'middle', style:{fontWeight:'bold', color:'#009900'}},
+    xAxis:{type:'datetime'},
+    yAxis:{title:{text:'%'},
+           min:0, max:120,
+           plotBands:[
+            {from:0,to:50,color:'rgba(255,0,0,0.2)',label:{text:'Mala', style:{color:'#900'}}},
+            {from:50,to:75,color:'rgba(255,165,0,0.2)',label:{text:'Moderada', style:{color:'#a60'}}},
+            {from:75,to:125,color:'rgba(0,255,0,0.2)',label:{text:'Buena', style:{color:'#090'}}}
+           ]},
+    series:[{name:'Calidad Aire', data:mq, color:'#009900'}]
+  });
+
+  // CO2
+  let ultimoCO2 = co2[co2.length-1][1];
+  let estadoCO2 = ultimoCO2 < 800 ? 'Bueno' : (ultimoCO2 <= 1200 ? 'Moderado' : 'Alto');
+  Highcharts.chart('co2Chart', {
+    chart:{type:'spline', backgroundColor:'#ffffff'},
+    title:{text:'CO₂ estimado (ppm)'},
+    subtitle:{text:'Estado: '+estadoCO2, align:'right', verticalAlign:'middle', style:{fontWeight:'bold', color:'#ff4d4d'}},
+    xAxis:{type:'datetime'},
+    yAxis:{title:{text:'ppm'}, min:400, max:2000,
+           plotBands:[
+            {from:0,to:800,color:'rgba(0,255,0,0.2)',label:{text:'Bueno', style:{color:'#090'}}},
+            {from:800,to:1200,color:'rgba(255,165,0,0.2)',label:{text:'Moderado', style:{color:'#a60'}}},
+            {from:1200,to:2000,color:'rgba(255,0,0,0.2)',label:{text:'Alto', style:{color:'#900'}}}
+           ]},
+    series:[{name:'CO₂', data:co2, color:'#ff4d4d'}]
   });
 
 }
 
-cargar();
-setInterval(cargar,5000);
-
+cargarDatos();
+setInterval(cargarDatos,6000);
 </script>
 
 </body>
