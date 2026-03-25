@@ -8,8 +8,8 @@
 <style>
 body{
   font-family:Arial;
-  background:#ffffff;
-  color:#000;
+  background:#000000;
+  color:#ffffff;
   text-align:center;
   margin:0;
   padding:0;
@@ -30,8 +30,8 @@ h1{
   margin:auto;
 }
 .chart{
-  height:350px; /* altura más grande para visibilidad */
-  background:#ffffff;
+  height:350px;
+  background:#111111;
   border-radius:10px;
   padding:5px;
 }
@@ -41,7 +41,6 @@ h1{
 
 <h1>🌎 AIRELAB Estación Ambiental Escolar 🌎</h1>
 
-<!-- ALERTA DE TEMPERATURA -->
 <div id="alerta">Cargando temperatura...</div>
 
 <div class="grid">
@@ -68,27 +67,40 @@ async function cargarDatos(){
     co2.push([t, Number(d.co2)]);
   });
 
-  // --- ALERTA DE TEMPERATURA ---
   const ultimoTemp = temp[temp.length-1][1];
   const alerta = document.getElementById("alerta");
 
   if(ultimoTemp < 20){
     alerta.innerHTML = "❄️ Temperatura BAJA ❄️";
-    alerta.style.color = "blue";
+    alerta.style.color = "cyan";
   } else if(ultimoTemp > 30){
     alerta.innerHTML = "🔥 Temperatura ALTA 🔥";
     alerta.style.color = "red";
   } else{
     alerta.innerHTML = "🟢 Temperatura NORMAL 🟢";
-    alerta.style.color = "green";
+    alerta.style.color = "lime";
   }
 
-  Highcharts.setOptions({time:{timezoneOffset:5*60}});
+  Highcharts.setOptions({
+    time:{timezoneOffset:5*60},
+    chart:{backgroundColor:'#000000'},
+    title:{style:{color:'#ffffff'}},
+    subtitle:{style:{color:'#cccccc'}},
+    xAxis:{
+      labels:{style:{color:'#ffffff'}},
+      gridLineColor:'#333333'
+    },
+    yAxis:{
+      labels:{style:{color:'#ffffff'}},
+      title:{style:{color:'#ffffff'}},
+      gridLineColor:'#333333'
+    },
+    legend:{itemStyle:{color:'#ffffff'}}
+  });
 
-  // --- TEMPERATURA ---
   let estadoTemp = ultimoTemp < 20 ? "Baja" : (ultimoTemp > 30 ? "Alta" : "Normal");
   Highcharts.chart('tempChart', {
-    chart:{type:'spline', backgroundColor:'#ffffff'},
+    chart:{type:'spline', backgroundColor:'#000000'},
     title:{text:'Temperatura del Aula'},
     subtitle:{text:'Estado: '+estadoTemp, align:'center', verticalAlign:'top',
               style:{fontWeight:'bold', fontSize:'14px'}},
@@ -99,18 +111,17 @@ async function cargarDatos(){
       max:50,
       plotBands:[
         {from:0, to:20, color:'rgba(0,0,255,0.1)', label:{text:'Baja', style:{color:'#00f'}}},
-        {from:20, to:30, color:'rgba(0,255,0,0.1)', label:{text:'Normal', style:{color:'#090'}}},
-        {from:30, to:50, color:'rgba(255,0,0,0.1)', label:{text:'Alta', style:{color:'#900'}}}
+        {from:20, to:30, color:'rgba(0,255,0,0.1)', label:{text:'Normal', style:{color:'#0f0'}}},
+        {from:30, to:50, color:'rgba(255,0,0,0.1)', label:{text:'Alta', style:{color:'#f00'}}}
       ]
     },
     series:[{name:'Temperatura', data:temp, color:'#ff4d4d'}]
   });
 
-  // --- HUMEDAD ---
   const ultimoHum = hum[hum.length-1][1];
   let estadoHum = ultimoHum < 30 ? 'Baja' : (ultimoHum <= 60 ? 'Normal' : 'Alta');
   Highcharts.chart('humChart', {
-    chart:{type:'spline', backgroundColor:'#ffffff'},
+    chart:{type:'spline', backgroundColor:'#000000'},
     title:{text:'Humedad Relativa'},
     subtitle:{text:'Estado: '+estadoHum, align:'center', verticalAlign:'top',
               style:{fontWeight:'bold', fontSize:'14px'}},
@@ -121,18 +132,17 @@ async function cargarDatos(){
       max:100,
       plotBands:[
         {from:0, to:30, color:'rgba(0,0,255,0.1)', label:{text:'Baja', style:{color:'#00f'}}},
-        {from:30, to:60, color:'rgba(0,255,0,0.1)', label:{text:'Normal', style:{color:'#090'}}},
-        {from:60, to:100, color:'rgba(255,0,0,0.1)', label:{text:'Alta', style:{color:'#900'}}}
+        {from:30, to:60, color:'rgba(0,255,0,0.1)', label:{text:'Normal', style:{color:'#0f0'}}},
+        {from:60, to:100, color:'rgba(255,0,0,0.1)', label:{text:'Alta', style:{color:'#f00'}}}
       ]
     },
     series:[{name:'Humedad', data:hum, color:'#4da6ff'}]
   });
 
-  // --- CALIDAD DEL AIRE ---
   const ultimoMQ = mq[mq.length-1][1];
   let estadoMQ = ultimoMQ < 50 ? 'Mala' : (ultimoMQ <= 75 ? 'Moderada' : 'Buena');
   Highcharts.chart('mqChart', {
-    chart:{type:'spline', backgroundColor:'#ffffff'},
+    chart:{type:'spline', backgroundColor:'#000000'},
     title:{text:'Calidad del Aire (%)'},
     subtitle:{text:'Estado: '+estadoMQ, align:'center', verticalAlign:'top',
               style:{fontWeight:'bold', fontSize:'14px'}},
@@ -142,19 +152,18 @@ async function cargarDatos(){
       min:0,
       max:120,
       plotBands:[
-        {from:0, to:50, color:'rgba(255,0,0,0.1)', label:{text:'Mala', style:{color:'#900'}}},
-        {from:50, to:75, color:'rgba(255,165,0,0.1)', label:{text:'Moderada', style:{color:'#a60'}}},
-        {from:75, to:120, color:'rgba(0,255,0,0.1)', label:{text:'Buena', style:{color:'#090'}}}
+        {from:0, to:50, color:'rgba(255,0,0,0.1)', label:{text:'Mala', style:{color:'#f00'}}},
+        {from:50, to:75, color:'rgba(255,165,0,0.1)', label:{text:'Moderada', style:{color:'#ffa500'}}},
+        {from:75, to:120, color:'rgba(0,255,0,0.1)', label:{text:'Buena', style:{color:'#0f0'}}}
       ]
     },
-    series:[{name:'Calidad Aire', data:mq, color:'#009900'}]
+    series:[{name:'Calidad Aire', data:mq, color:'#00ff99'}]
   });
 
-  // --- CO2 ---
   const ultimoCO2 = co2[co2.length-1][1];
   let estadoCO2 = ultimoCO2 < 800 ? 'Bueno' : (ultimoCO2 <= 1200 ? 'Moderado' : 'Alto');
   Highcharts.chart('co2Chart', {
-    chart:{type:'spline', backgroundColor:'#ffffff'},
+    chart:{type:'spline', backgroundColor:'#000000'},
     title:{text:'CO₂ estimado (ppm)'},
     subtitle:{text:'Estado: '+estadoCO2, align:'center', verticalAlign:'top',
               style:{fontWeight:'bold', fontSize:'14px'}},
@@ -164,9 +173,9 @@ async function cargarDatos(){
       min:400,
       max:2000,
       plotBands:[
-        {from:0, to:800, color:'rgba(0,255,0,0.1)', label:{text:'Bueno', style:{color:'#090'}}},
-        {from:800, to:1200, color:'rgba(255,165,0,0.1)', label:{text:'Moderado', style:{color:'#a60'}}},
-        {from:1200, to:2000, color:'rgba(255,0,0,0.1)', label:{text:'Alto', style:{color:'#900'}}}
+        {from:0, to:800, color:'rgba(0,255,0,0.1)', label:{text:'Bueno', style:{color:'#0f0'}}},
+        {from:800, to:1200, color:'rgba(255,165,0,0.1)', label:{text:'Moderado', style:{color:'#ffa500'}}},
+        {from:1200, to:2000, color:'rgba(255,0,0,0.1)', label:{text:'Alto', style:{color:'#f00'}}}
       ]
     },
     series:[{name:'CO₂', data:co2, color:'#ff4d4d'}]
